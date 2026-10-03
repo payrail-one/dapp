@@ -12,6 +12,12 @@
   .output-panel pre {
     min-height: 360px;
   }
+  .contract-workspace {
+    grid-template-columns: 1fr 1fr;
+  }
+  .contract-workspace .live-output {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 760px) {
@@ -66,6 +72,9 @@
   .workspace {
     grid-template-columns: 1fr;
     margin-top: 24px;
+  }
+  .contract-workspace {
+    grid-template-columns: 1fr;
   }
   .scenario-panel,
   .intent-panel {

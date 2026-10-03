@@ -7,8 +7,9 @@ import type {
   ContractSubmission,
 } from './types';
 
-const MAX_ARGS_BYTES = 256 * 1024;
-const MAX_SIGNED_ENVELOPE_BYTES = 512 * 1024;
+const MAX_ARGS_BYTES = 4 * 1024;
+const MAX_EXECUTION_UNITS = 100_000n;
+const MAX_SIGNED_ENVELOPE_BYTES = 32 * 1024;
 
 export class PayrailContractKit {
   constructor(readonly provider: ContractProvider) {
@@ -32,7 +33,7 @@ export class PayrailContractKit {
       entrypoint: entrypoint(input.entrypoint),
       args,
       attachedAmount: unsigned(input.attachedAmount ?? 0n, 'attachedAmount'),
-      executionBudget: positive(input.executionBudget, 'executionBudget'),
+      executionBudget: executionBudget(input.executionBudget),
       nonce: unsigned(input.nonce, 'nonce'),
       validUntilHeight: positive(input.validUntilHeight, 'validUntilHeight'),
     });
@@ -57,15 +58,23 @@ export class PayrailContractKit {
 
 function identifier(value: string, field: string): string {
   const normalized = value.trim();
-  if (!/^[a-zA-Z0-9][a-zA-Z0-9._:-]{2,127}$/.test(normalized)) {
-    throw new TypeError(`${field} is not a valid opaque identifier.`);
+  if (field === 'contractId' && !/^[0-9a-f]{64}$/.test(normalized)) {
+    throw new TypeError(
+      'contractId must be a canonical 32-byte hexadecimal identifier.',
+    );
+  }
+  if (
+    field !== 'contractId' &&
+    !/^[a-z0-9]{2,16}1[ac-hj-np-z02-9]{20,100}$/.test(normalized)
+  ) {
+    throw new TypeError(`${field} is not a valid Payrail address.`);
   }
   return normalized;
 }
 
 function entrypoint(value: string): string {
   const normalized = value.trim();
-  if (!/^[A-Za-z_][A-Za-z0-9_]{0,63}$/.test(normalized)) {
+  if (!/^[a-z][a-z0-9_]{0,31}$/.test(normalized)) {
     throw new TypeError('Invalid contract entrypoint.');
   }
   return normalized;
@@ -79,4 +88,14 @@ function unsigned(value: bigint, field: string): bigint {
 function positive(value: bigint, field: string): bigint {
   if (value <= 0n) throw new RangeError(`${field} must be positive.`);
   return value;
+}
+
+function executionBudget(value: bigint): bigint {
+  const parsed = positive(value, 'executionBudget');
+  if (parsed > MAX_EXECUTION_UNITS) {
+    throw new RangeError(
+      `executionBudget cannot exceed ${MAX_EXECUTION_UNITS}.`,
+    );
+  }
+  return parsed;
 }

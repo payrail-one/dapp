@@ -452,3 +452,97 @@
   color: var(--faint);
   font-size: 12px;
 }
+
+.contract-workspace {
+  grid-template-columns: minmax(380px, 1.05fr) minmax(360px, 0.9fr) minmax(
+      390px,
+      1fr
+    );
+}
+.source-panel textarea {
+  min-height: 560px;
+  color: #bff8db;
+  line-height: 1.7;
+  tab-size: 2;
+}
+.docs-link {
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+}
+.call-panel form {
+  border-bottom: 1px solid var(--line);
+}
+.state-card {
+  margin: 22px;
+  border: 1px solid var(--line);
+  background: #07110e;
+}
+.state-card > span {
+  display: block;
+  padding: 13px 15px;
+  border-bottom: 1px solid var(--line);
+  color: var(--accent);
+  font:
+    500 9px 'DM Mono',
+    monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.state-card dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+}
+.state-card dl div {
+  min-width: 0;
+  padding: 13px;
+  border-right: 1px solid var(--line);
+}
+.state-card dl div:last-child {
+  border-right: 0;
+}
+.state-card dt {
+  color: var(--faint);
+  font:
+    400 8px 'DM Mono',
+    monospace;
+  text-transform: uppercase;
+}
+.state-card dd {
+  overflow: hidden;
+  margin: 6px 0 0;
+  color: #bfd1ca;
+  font:
+    500 10px 'DM Mono',
+    monospace;
+  text-overflow: ellipsis;
+}
+.state-card pre {
+  min-height: 155px;
+  max-height: 240px;
+  overflow: auto;
+  margin: 0;
+  padding: 15px;
+  border-top: 1px solid var(--line);
+  color: #8eaaa0;
+  background: #050d0b;
+  font:
+    400 10px/1.6 'DM Mono',
+    monospace;
+}
+.live-output {
+  grid-template-rows: 75px 44px minmax(600px, 1fr);
+}
+.live-output .output-tabs {
+  align-items: center;
+  padding: 0 15px;
+  color: var(--faint);
+  font:
+    500 9px 'DM Mono',
+    monospace;
+  letter-spacing: 0.08em;
+}
+.live-output > pre {
+  min-height: 600px;
+}

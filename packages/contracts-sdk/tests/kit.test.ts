@@ -2,6 +2,9 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   PayrailContractKit,
+  compileContractSource,
+  contractBody,
+  contractProgram,
   hexToBytes,
   type ContractProvider,
 } from '../src/index';
@@ -45,8 +48,8 @@ test('canonical codecs reject ambiguous values', () => {
 test('intent construction preserves monetary values as bigint', () => {
   const kit = new PayrailContractKit(provider());
   const intent = kit.intent({
-    contractId: 'escrow.preview',
-    caller: 'account.preview',
+    contractId: '11'.repeat(32),
+    caller: `paydev1${'q'.repeat(52)}`,
     entrypoint: 'release',
     args: Uint8Array.of(1, 2),
     attachedAmount: 9_007_199_254_740_993n,
@@ -62,8 +65,8 @@ test('intent construction preserves monetary values as bigint', () => {
 test('intent validation rejects unsafe execution boundaries', () => {
   const kit = new PayrailContractKit(provider());
   const input = {
-    contractId: 'escrow.preview',
-    caller: 'account.preview',
+    contractId: '11'.repeat(32),
+    caller: `paydev1${'q'.repeat(52)}`,
     entrypoint: 'release',
     executionBudget: 1n,
     nonce: 0n,
@@ -83,8 +86,8 @@ test('intent validation rejects unsafe execution boundaries', () => {
 test('simulation delegates a validated immutable intent', async () => {
   const kit = new PayrailContractKit(provider());
   const result = await kit.simulate({
-    contractId: 'escrow.preview',
-    caller: 'account.preview',
+    contractId: '11'.repeat(32),
+    caller: `paydev1${'q'.repeat(52)}`,
     entrypoint: 'release',
     attachedAmount: 500n,
     executionBudget: 25_000n,
@@ -93,4 +96,64 @@ test('simulation delegates a validated immutable intent', async () => {
   });
   assert.equal(result.accepted, true);
   assert.equal(result.estimatedUnits, 21_000n);
+});
+
+test('bytecode builder emits a canonical executable PRC1 program', () => {
+  const code = contractProgram()
+    .entrypoint(
+      'deposit',
+      contractBody()
+        .attachedAmount()
+        .store('deposited')
+        .emit('Deposited')
+        .halt(),
+    )
+    .entrypoint(
+      'refund',
+      contractBody().state('deposited').transferToCaller().halt(),
+    )
+    .build();
+  assert.deepEqual([...code.slice(0, 5)], [0x50, 0x52, 0x43, 0x31, 2]);
+  assert.ok(code.byteLength < 16 * 1024);
+});
+
+test('runtime bounds are enforced before provider submission', () => {
+  const kit = new PayrailContractKit(provider());
+  const input = {
+    contractId: '11'.repeat(32),
+    caller: `paydev1${'q'.repeat(52)}`,
+    entrypoint: 'release',
+    executionBudget: 100_001n,
+    nonce: 0n,
+    validUntilHeight: 1n,
+  } as const;
+  assert.throws(() => kit.intent(input), /cannot exceed/);
+  assert.throws(
+    () =>
+      kit.intent({ ...input, executionBudget: 1n, args: new Uint8Array(4097) }),
+    /4096/,
+  );
+});
+
+test('source compiler creates bytecode accepted by the PRC1 format', () => {
+  const source = `payrail 1
+entry deposit
+  attached_amount
+  store deposited
+  emit Deposited
+end
+
+entry refund
+  state deposited
+  transfer_caller
+  const 0
+  store deposited
+  emit Refunded
+end`;
+  const code = compileContractSource(source);
+  assert.deepEqual([...code.slice(0, 5)], [0x50, 0x52, 0x43, 0x31, 2]);
+  assert.throws(
+    () => compileContractSource('entry broken\nunknown\nend'),
+    /Line 2: unknown instruction/,
+  );
 });

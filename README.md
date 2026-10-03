@@ -1,28 +1,34 @@
-# Payrail Developer Sandbox
+# Payrail Live Contract Sandbox
 
-The open-source application behind [dapp.payrail.one](https://dapp.payrail.one). It is a Workstar and TypeScript workspace for building, validating and locally simulating programmable payment intents with the Payrail contracts SDK preview.
+The open-source Workstar application behind
+[dapp.payrail.one](https://dapp.payrail.one). It compiles Payrail Contract
+Language v1, signs with an ephemeral in-browser Ed25519 wallet and submits real
+deploy/call operations to the four-validator Payrail development network.
 
-## What is included
+## What works
 
-- Conditional escrow, revenue split, payout policy and subscription scenarios
-- Editable canonical intent fields and JSON arguments
-- Integer-safe local policy simulation with inspectable output
-- SDK code generation, intent export and session-local history
-- Read-only Payrail devnet health and finality status
-- Responsive developer UI, unit tests and Playwright browser tests
+- editable, non-evaluating source compiler for bounded `PRC1` bytecode;
+- automatically funded ephemeral devnet wallet (tab lifetime only);
+- canonical signed `ContractDeploy` and `ContractCall` envelopes;
+- finalized block, transaction, execution-unit and event receipts;
+- canonical contract balance and state query after execution;
+- integer-only amounts and the same code/argument/fuel limits as the Rust VM.
 
-## Safety boundary
-
-The public Payrail contract runtime and ABI are not released yet. This sandbox therefore uses a local preview provider. It never asks for wallet secrets, creates a signature or presents a simulation as a finalized network operation. `networkWrite` is always `false`.
+The TEST asset has no monetary value. This runtime is intentionally narrow and
+not EVM-compatible. It has no filesystem, network, clock, randomness, floating
+point or unbounded execution. R1 is a separate external network and is not used
+by this application.
 
 ## Run locally
 
 ```bash
-npm ci
+npm ci --ignore-scripts
 npm run dev
 ```
 
-The Vite development server opens on `http://localhost:5173`. The Cloudflare Worker proxies only the read-only `/api/network` endpoint in production.
+The Vite application opens on `http://localhost:4184`. The production
+Cloudflare Worker proxies only the required Payrail devnet routes; signed
+envelopes never contain private keys.
 
 ## Verify
 
@@ -35,13 +41,19 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
+The browser tests mock HTTP to test UI states. Release acceptance additionally
+deploys and calls a signed contract through `https://devnet.payrail.one`, then
+queries its finalized canonical state.
+
 ## Repository structure
 
 ```text
-apps/dapp/              Workstar browser app and edge worker
-packages/contracts-sdk/ Transport-neutral contract intent SDK preview
-packages/ui-kit/        Minimal shared Payrail brand primitive
-tests/e2e/              End-to-end sandbox checks
+apps/dapp/              Workstar browser app and restricted edge proxy
+packages/contracts-sdk/ PRC1 builder and source compiler
+packages/wallet-core/   Browser Ed25519 signing and canonical envelopes
+packages/api-client/    Typed Payrail devnet API boundary
+packages/ui-kit/        Payrail brand primitive
+tests/e2e/              Browser interaction tests
 ```
 
 Licensed under Apache-2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).

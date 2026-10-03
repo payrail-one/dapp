@@ -3,9 +3,9 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:104120e9-c5a3-46b7-a154-d14ac38dc738",
+  "serialNumber": "urn:uuid:a5ef6fb4-c598-463e-a888-eb73700d8e6c",
   "metadata": {
-    "timestamp": "2026-10-03T21:25:15.185Z",
+    "timestamp": "2026-10-03T22:38:31.147Z",
     "tools": {
       "components": [
         {
@@ -17,7 +17,7 @@
           "type": "application",
           "name": "cyclonedx-npm",
           "group": "@cyclonedx",
-          "version": "6.0.1",
+          "version": "4.1.2",
           "author": "Jan Kowalleck",
           "description": "Create CycloneDX Software Bill of Materials (SBOM) from NPM projects.",
           "licenses": [
@@ -43,23 +43,13 @@
               "type": "issue-tracker",
               "comment": "as detected from PackageJson property \"bugs.url\""
             }
-          ],
-          "properties": [
-            {
-              "name": "cdx:npm:package:constraint:engine:node",
-              "value": ">=20.18.0"
-            },
-            {
-              "name": "cdx:npm:package:constraint:engine:npm",
-              "value": ">=9"
-            }
           ]
         },
         {
           "type": "library",
           "name": "cyclonedx-library",
           "group": "@cyclonedx",
-          "version": "10.3.0",
+          "version": "9.5.0",
           "author": "Jan Kowalleck",
           "description": "Core functionality of CycloneDX for JavaScript (Node.js or WebBrowser).",
           "licenses": [
@@ -84,12 +74,6 @@
               "url": "https://github.com/CycloneDX/cyclonedx-javascript-library/issues",
               "type": "issue-tracker",
               "comment": "as detected from PackageJson property \"bugs.url\""
-            }
-          ],
-          "properties": [
-            {
-              "name": "cdx:npm:package:constraint:engine:node",
-              "value": ">=20.18.0"
             }
           ]
         }
@@ -129,7 +113,7 @@
           "acknowledgement": "declared"
         }
       ],
-      "purl": "pkg:npm/%40img/sharp-wasm32@0.35.4",
+      "purl": "pkg:npm/%40img/sharp-wasm32@0.35.4#npm/wasm32",
       "externalReferences": [
         {
           "url": "git+https://github.com/lovell/sharp.git#npm/wasm32",
@@ -159,10 +143,6 @@
         }
       ],
       "properties": [
-        {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=20.9.0"
-        },
         {
           "name": "cdx:npm:package:development",
           "value": "true"
@@ -244,10 +224,10 @@
       "type": "library",
       "name": "contracts-sdk",
       "group": "@payrail",
-      "version": "0.0.1-preview.0",
-      "bom-ref": "payrail-dapp@0.1.0|@payrail/contracts-sdk@0.0.1-preview.0",
-      "description": "Transport-neutral Payrail contract SDK preview",
-      "purl": "pkg:npm/%40payrail/contracts-sdk@0.0.1-preview.0",
+      "version": "0.1.0",
+      "bom-ref": "payrail-dapp@0.1.0|@payrail/contracts-sdk@0.1.0",
+      "description": "Payrail PRC1 smart-contract compiler, bytecode builder and client boundary",
+      "purl": "pkg:npm/%40payrail/contracts-sdk@0.1.0",
       "properties": [
         {
           "name": "cdx:npm:package:path",
@@ -288,6 +268,42 @@
         {
           "name": "cdx:npm:package:path",
           "value": "node_modules/@payrail/dapp"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "api-client",
+      "group": "@platform",
+      "version": "0.0.0",
+      "bom-ref": "payrail-dapp@0.1.0|@platform/api-client@0.0.0",
+      "purl": "pkg:npm/%40platform/api-client@0.0.0",
+      "properties": [
+        {
+          "name": "cdx:npm:package:private",
+          "value": "true"
+        },
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/@platform/api-client"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "wallet-core",
+      "group": "@platform",
+      "version": "0.0.0",
+      "bom-ref": "payrail-dapp@0.1.0|@platform/wallet-core@0.0.0",
+      "purl": "pkg:npm/%40platform/wallet-core@0.0.0",
+      "properties": [
+        {
+          "name": "cdx:npm:package:private",
+          "value": "true"
+        },
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/@platform/wallet-core"
         }
       ]
     },
@@ -337,10 +353,6 @@
         }
       ],
       "properties": [
-        {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=20"
-        },
         {
           "name": "cdx:npm:package:development",
           "value": "true"
@@ -396,10 +408,6 @@
         }
       ],
       "properties": [
-        {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=14"
-        },
         {
           "name": "cdx:npm:package:development",
           "value": "true"
@@ -516,10 +524,6 @@
       ],
       "properties": [
         {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=18.0.0"
-        },
-        {
           "name": "cdx:npm:package:development",
           "value": "true"
         },
@@ -575,10 +579,6 @@
       ],
       "properties": [
         {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=14.17"
-        },
-        {
           "name": "cdx:npm:package:development",
           "value": "true"
         },
@@ -603,7 +603,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/vite@8.0.16",
+      "purl": "pkg:npm/vite@8.0.16#packages/vite",
       "externalReferences": [
         {
           "url": "git+https://github.com/vitejs/vite.git#packages/vite",
@@ -634,10 +634,6 @@
       ],
       "properties": [
         {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": "^20.19.0 || >=22.12.0"
-        },
-        {
           "name": "cdx:npm:package:development",
           "value": "true"
         },
@@ -660,7 +656,7 @@
           "acknowledgement": "declared"
         }
       ],
-      "purl": "pkg:npm/wrangler@4.147.0",
+      "purl": "pkg:npm/wrangler@4.147.0#packages/wrangler",
       "externalReferences": [
         {
           "url": "git+https://github.com/cloudflare/workers-sdk.git#packages/wrangler",
@@ -690,10 +686,6 @@
         }
       ],
       "properties": [
-        {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=22.0.0"
-        },
         {
           "name": "cdx:npm:package:development",
           "value": "true"
@@ -748,10 +740,6 @@
             }
           ],
           "properties": [
-            {
-              "name": "cdx:npm:package:constraint:engine:node",
-              "value": ">=18"
-            },
             {
               "name": "cdx:npm:package:development",
               "value": "true"
@@ -809,10 +797,6 @@
           ],
           "properties": [
             {
-              "name": "cdx:npm:package:constraint:engine:node",
-              "value": ">=18"
-            },
-            {
               "name": "cdx:npm:package:development",
               "value": "true"
             },
@@ -839,7 +823,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/%40types/node@26.6.2",
+      "purl": "pkg:npm/%40types/node@26.6.2#types/node",
       "externalReferences": [
         {
           "url": "git+https://github.com/DefinitelyTyped/DefinitelyTyped.git#types/node",
@@ -925,12 +909,60 @@
       ],
       "properties": [
         {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=20"
-        },
-        {
           "name": "cdx:npm:package:path",
           "value": "node_modules/workstar"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "base",
+      "group": "@scure",
+      "version": "2.4.0",
+      "bom-ref": "payrail-dapp@0.1.0|@scure/base@2.4.0",
+      "author": "Paul Miller",
+      "description": "Secure, audited & 0-dep implementation of base64, bech32, base58, base32 & base16",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "purl": "pkg:npm/%40scure/base@2.4.0",
+      "externalReferences": [
+        {
+          "url": "git+https://github.com/paulmillr/scure-base.git",
+          "type": "vcs",
+          "comment": "as detected from PackageJson property \"repository.url\""
+        },
+        {
+          "url": "https://paulmillr.com/noble/#scure",
+          "type": "website",
+          "comment": "as detected from PackageJson property \"homepage\""
+        },
+        {
+          "url": "https://github.com/paulmillr/scure-base/issues",
+          "type": "issue-tracker",
+          "comment": "as detected from PackageJson property \"bugs.url\""
+        },
+        {
+          "url": "https://registry.npmjs.org/@scure/base/-/base-2.4.0.tgz",
+          "type": "distribution",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "b616754ee27017005b94e860b230cabef1a2ac1c4da7ec12bd8fc347ab490493930e174001c1c9f156ebd9e167a9ac5e71ae3eb748bd2817feb876065b064e46"
+            }
+          ],
+          "comment": "as detected from npm-ls property \"resolved\" and property \"integrity\""
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/@scure/base"
         }
       ]
     },
@@ -979,10 +1011,6 @@
         }
       ],
       "properties": [
-        {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=20"
-        },
         {
           "name": "cdx:npm:package:development",
           "value": "true"
@@ -1037,10 +1065,6 @@
         }
       ],
       "properties": [
-        {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=18"
-        },
         {
           "name": "cdx:npm:package:development",
           "value": "true"
@@ -1097,10 +1121,6 @@
       ],
       "properties": [
         {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": "^8.16.0 || ^10.6.0 || >=11.0.0"
-        },
-        {
           "name": "cdx:npm:package:development",
           "value": "true"
         },
@@ -1154,10 +1174,6 @@
         }
       ],
       "properties": [
-        {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">= 12.0.0"
-        },
         {
           "name": "cdx:npm:package:development",
           "value": "true"
@@ -1214,10 +1230,6 @@
       ],
       "properties": [
         {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=12"
-        },
-        {
           "name": "cdx:npm:package:development",
           "value": "true"
         },
@@ -1273,10 +1285,6 @@
       ],
       "properties": [
         {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": "^10 || ^12 || >=14"
-        },
-        {
           "name": "cdx:npm:package:development",
           "value": "true"
         },
@@ -1300,7 +1308,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/rolldown@1.0.3",
+      "purl": "pkg:npm/rolldown@1.0.3#packages/rolldown",
       "externalReferences": [
         {
           "url": "git+https://github.com/rolldown/rolldown.git#packages/rolldown",
@@ -1330,10 +1338,6 @@
         }
       ],
       "properties": [
-        {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": "^20.19.0 || >=22.12.0"
-        },
         {
           "name": "cdx:npm:package:development",
           "value": "true"
@@ -1390,10 +1394,6 @@
       ],
       "properties": [
         {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=12.0.0"
-        },
-        {
           "name": "cdx:npm:package:development",
           "value": "true"
         },
@@ -1417,7 +1417,7 @@
           "acknowledgement": "declared"
         }
       ],
-      "purl": "pkg:npm/%40cloudflare/kv-asset-handler@0.5.0",
+      "purl": "pkg:npm/%40cloudflare/kv-asset-handler@0.5.0#packages/kv-asset-handler",
       "externalReferences": [
         {
           "url": "git+https://github.com/cloudflare/workers-sdk.git#packages/kv-asset-handler",
@@ -1448,10 +1448,6 @@
       ],
       "properties": [
         {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=22.0.0"
-        },
-        {
           "name": "cdx:npm:package:development",
           "value": "true"
         },
@@ -1474,7 +1470,7 @@
           "acknowledgement": "declared"
         }
       ],
-      "purl": "pkg:npm/%40cloudflare/unenv-preset@2.16.2",
+      "purl": "pkg:npm/%40cloudflare/unenv-preset@2.16.2#packages/unenv-preset",
       "externalReferences": [
         {
           "url": "git+https://github.com/cloudflare/workers-sdk.git#packages/unenv-preset",
@@ -1584,7 +1580,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/miniflare@5.20261001.0-alpha",
+      "purl": "pkg:npm/miniflare@5.20261001.0-alpha#packages/miniflare",
       "externalReferences": [
         {
           "url": "git+https://github.com/cloudflare/workers-sdk.git#packages/miniflare",
@@ -1614,10 +1610,6 @@
         }
       ],
       "properties": [
-        {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=22.0.0"
-        },
         {
           "name": "cdx:npm:package:development",
           "value": "true"
@@ -1780,10 +1772,6 @@
       ],
       "properties": [
         {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=16"
-        },
-        {
           "name": "cdx:npm:package:development",
           "value": "true"
         },
@@ -1861,7 +1849,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/workstar-router@0.2.2",
+      "purl": "pkg:npm/workstar-router@0.2.2#packages/router",
       "externalReferences": [
         {
           "url": "git+https://github.com/wslab-ai/workstar.git#packages/router",
@@ -1891,10 +1879,6 @@
         }
       ],
       "properties": [
-        {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=20"
-        },
         {
           "name": "cdx:npm:package:path",
           "value": "node_modules/workstar-router"
@@ -1946,10 +1930,6 @@
         }
       ],
       "properties": [
-        {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=20"
-        },
         {
           "name": "cdx:npm:package:development",
           "value": "true"
@@ -2007,10 +1987,6 @@
       ],
       "properties": [
         {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=18"
-        },
-        {
           "name": "cdx:npm:package:development",
           "value": "true"
         },
@@ -2065,10 +2041,6 @@
         }
       ],
       "properties": [
-        {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=8"
-        },
         {
           "name": "cdx:npm:package:development",
           "value": "true"
@@ -2125,10 +2097,6 @@
       ],
       "properties": [
         {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">= 12.0.0"
-        },
-        {
           "name": "cdx:npm:package:development",
           "value": "true"
         },
@@ -2183,10 +2151,6 @@
         }
       ],
       "properties": [
-        {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": "^10 || ^12 || ^13.7 || ^14 || >=15.0.1"
-        },
         {
           "name": "cdx:npm:package:development",
           "value": "true"
@@ -2298,10 +2262,6 @@
       ],
       "properties": [
         {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=0.10.0"
-        },
-        {
           "name": "cdx:npm:package:development",
           "value": "true"
         },
@@ -2327,7 +2287,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/%40oxc-project/types@0.133.0",
+      "purl": "pkg:npm/%40oxc-project/types@0.133.0#npm/oxc-types",
       "externalReferences": [
         {
           "url": "git+https://github.com/oxc-project/oxc.git#npm/oxc-types",
@@ -2383,7 +2343,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/%40rolldown/binding-darwin-arm64@1.0.3",
+      "purl": "pkg:npm/%40rolldown/binding-darwin-arm64@1.0.3#packages/rolldown",
       "externalReferences": [
         {
           "url": "git+https://github.com/rolldown/rolldown.git#packages/rolldown",
@@ -2414,10 +2374,6 @@
       ],
       "properties": [
         {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": "^20.19.0 || >=22.12.0"
-        },
-        {
           "name": "cdx:npm:package:development",
           "value": "true"
         },
@@ -2442,7 +2398,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/%40rolldown/pluginutils@1.0.1",
+      "purl": "pkg:npm/%40rolldown/pluginutils@1.0.1#packages/pluginutils",
       "externalReferences": [
         {
           "url": "git+https://github.com/rolldown/plugins.git#packages/pluginutils",
@@ -2528,10 +2484,6 @@
       ],
       "properties": [
         {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=12.0.0"
-        },
-        {
           "name": "cdx:npm:package:development",
           "value": "true"
         },
@@ -2586,10 +2538,6 @@
         }
       ],
       "properties": [
-        {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=12"
-        },
         {
           "name": "cdx:npm:package:development",
           "value": "true"
@@ -2646,10 +2594,6 @@
       ],
       "properties": [
         {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=20.9.0"
-        },
-        {
           "name": "cdx:npm:package:development",
           "value": "true"
         },
@@ -2703,10 +2647,6 @@
         }
       ],
       "properties": [
-        {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=20.18.1"
-        },
         {
           "name": "cdx:npm:package:development",
           "value": "true"
@@ -2762,10 +2702,6 @@
         }
       ],
       "properties": [
-        {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=10.0.0"
-        },
         {
           "name": "cdx:npm:package:development",
           "value": "true"
@@ -2932,10 +2868,6 @@
       ],
       "properties": [
         {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=16"
-        },
-        {
           "name": "cdx:npm:package:development",
           "value": "true"
         },
@@ -3047,10 +2979,6 @@
       ],
       "properties": [
         {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=18"
-        },
-        {
           "name": "cdx:npm:package:development",
           "value": "true"
         },
@@ -3077,7 +3005,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/%40img/sharp-darwin-arm64@0.35.4",
+      "purl": "pkg:npm/%40img/sharp-darwin-arm64@0.35.4#npm/darwin-arm64",
       "externalReferences": [
         {
           "url": "git+https://github.com/lovell/sharp.git#npm/darwin-arm64",
@@ -3108,10 +3036,6 @@
       ],
       "properties": [
         {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=20.9.0"
-        },
-        {
           "name": "cdx:npm:package:development",
           "value": "true"
         },
@@ -3138,7 +3062,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/%40img/sharp-libvips-darwin-arm64@1.3.3",
+      "purl": "pkg:npm/%40img/sharp-libvips-darwin-arm64@1.3.3#npm/darwin-arm64",
       "externalReferences": [
         {
           "url": "git+https://github.com/lovell/sharp-libvips.git#npm/darwin-arm64",
@@ -3223,10 +3147,6 @@
         }
       ],
       "properties": [
-        {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=10"
-        },
         {
           "name": "cdx:npm:package:development",
           "value": "true"
@@ -3451,10 +3371,6 @@
       ],
       "properties": [
         {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=18"
-        },
-        {
           "name": "cdx:npm:package:development",
           "value": "true"
         },
@@ -3566,10 +3482,6 @@
       ],
       "properties": [
         {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=6.0.0"
-        },
-        {
           "name": "cdx:npm:package:development",
           "value": "true"
         },
@@ -3595,7 +3507,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/%40jridgewell/sourcemap-codec@1.6.0",
+      "purl": "pkg:npm/%40jridgewell/sourcemap-codec@1.6.0#packages/sourcemap-codec",
       "externalReferences": [
         {
           "url": "git+https://github.com/jridgewell/sourcemaps.git#packages/sourcemap-codec",
@@ -3681,10 +3593,6 @@
       ],
       "properties": [
         {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=6"
-        },
-        {
           "name": "cdx:npm:package:development",
           "value": "true"
         },
@@ -3741,10 +3649,6 @@
       ],
       "properties": [
         {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=18"
-        },
-        {
           "name": "cdx:npm:package:development",
           "value": "true"
         },
@@ -3799,10 +3703,6 @@
         }
       ],
       "properties": [
-        {
-          "name": "cdx:npm:package:constraint:engine:node",
-          "value": ">=18"
-        },
         {
           "name": "cdx:npm:package:development",
           "value": "true"
@@ -3929,9 +3829,11 @@
       "ref": "payrail-dapp@0.1.0",
       "dependsOn": [
         "payrail-dapp@0.1.0|@img/sharp-wasm32@0.35.4",
-        "payrail-dapp@0.1.0|@payrail/contracts-sdk@0.0.1-preview.0",
+        "payrail-dapp@0.1.0|@payrail/contracts-sdk@0.1.0",
         "payrail-dapp@0.1.0|@payrail/dapp-ui@0.1.0",
         "payrail-dapp@0.1.0|@payrail/dapp@0.1.0",
+        "payrail-dapp@0.1.0|@platform/api-client@0.0.0",
+        "payrail-dapp@0.1.0|@platform/wallet-core@0.0.0",
         "payrail-dapp@0.1.0|@playwright/test@1.63.0",
         "payrail-dapp@0.1.0|prettier@3.8.3",
         "payrail-dapp@0.1.0|tslib@2.8.1",
@@ -3954,7 +3856,7 @@
       ]
     },
     {
-      "ref": "payrail-dapp@0.1.0|@payrail/contracts-sdk@0.0.1-preview.0",
+      "ref": "payrail-dapp@0.1.0|@payrail/contracts-sdk@0.1.0",
       "dependsOn": [
         "payrail-dapp@0.1.0|@types/node@26.6.2"
       ]
@@ -3968,9 +3870,24 @@
     {
       "ref": "payrail-dapp@0.1.0|@payrail/dapp@0.1.0",
       "dependsOn": [
-        "payrail-dapp@0.1.0|@payrail/contracts-sdk@0.0.1-preview.0",
+        "payrail-dapp@0.1.0|@payrail/contracts-sdk@0.1.0",
         "payrail-dapp@0.1.0|@payrail/dapp-ui@0.1.0",
+        "payrail-dapp@0.1.0|@platform/wallet-core@0.0.0",
         "payrail-dapp@0.1.0|workstar@0.2.2"
+      ]
+    },
+    {
+      "ref": "payrail-dapp@0.1.0|@platform/api-client@0.0.0",
+      "dependsOn": [
+        "payrail-dapp@0.1.0|typescript@6.0.3"
+      ]
+    },
+    {
+      "ref": "payrail-dapp@0.1.0|@platform/wallet-core@0.0.0",
+      "dependsOn": [
+        "payrail-dapp@0.1.0|@platform/api-client@0.0.0",
+        "payrail-dapp@0.1.0|@scure/base@2.4.0",
+        "payrail-dapp@0.1.0|typescript@6.0.3"
       ]
     },
     {
@@ -4043,6 +3960,9 @@
       "dependsOn": [
         "payrail-dapp@0.1.0|workstar-router@0.2.2"
       ]
+    },
+    {
+      "ref": "payrail-dapp@0.1.0|@scure/base@2.4.0"
     },
     {
       "ref": "payrail-dapp@0.1.0|playwright@1.63.0",

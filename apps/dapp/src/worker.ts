@@ -6,7 +6,7 @@ interface WorkerEnvironment {
 
 const apiHeaders = {
   'access-control-allow-headers': 'content-type',
-  'access-control-allow-methods': 'GET, HEAD, OPTIONS',
+  'access-control-allow-methods': 'GET, HEAD, POST, OPTIONS',
   'access-control-allow-origin': '*',
   'access-control-max-age': '86400',
   'cache-control': 'no-store',
@@ -38,20 +38,26 @@ function withHeaders(
   });
 }
 
-async function networkStatus(request: Request): Promise<Response> {
+async function devnetApi(request: Request, path: string): Promise<Response> {
   if (request.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: apiHeaders });
   }
-  if (!['GET', 'HEAD'].includes(request.method)) {
+  if (!['GET', 'HEAD', 'POST'].includes(request.method)) {
     return withHeaders(
       new Response('method not allowed', { status: 405 }),
       apiHeaders,
     );
   }
-  const upstream = new URL('/api/status', ORIGIN);
+  const upstream = new URL(path, ORIGIN);
   const response = await fetch(upstream, {
     method: request.method,
-    headers: { accept: 'application/json' },
+    headers: {
+      accept: 'application/json',
+      ...(request.headers.get('content-type') === 'application/json'
+        ? { 'content-type': 'application/json' }
+        : {}),
+    },
+    body: request.method === 'POST' ? request.body : null,
     redirect: 'manual',
   });
   return withHeaders(response, apiHeaders);
@@ -68,7 +74,15 @@ export default {
       return Response.redirect(incoming, 308);
     }
     if (incoming.pathname === '/api/network') {
-      return networkStatus(request);
+      return devnetApi(request, '/api/status');
+    }
+    if (
+      incoming.pathname === '/api/faucet' ||
+      incoming.pathname === '/api/transactions' ||
+      incoming.pathname.startsWith('/api/accounts/') ||
+      incoming.pathname.startsWith('/api/contracts/')
+    ) {
+      return devnetApi(request, incoming.pathname);
     }
     if (incoming.pathname.startsWith('/api/')) {
       return withHeaders(

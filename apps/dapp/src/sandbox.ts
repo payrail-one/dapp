@@ -1,174 +1,183 @@
-import { attr, html, on, signal, textareaValue } from 'workstar';
-import { loadNetwork, type PublicNetworkStatus } from './api';
-import { sandboxScenarios, type ScenarioId } from './scenarios';
+import { compileContractSource, hexToBytes } from '@payrail/contracts-sdk';
 import {
-  draftForScenario,
-  sdkSnippet,
-  serializeDraft,
-  simulateDraft,
-  type SandboxDraft,
-  type SandboxRun,
-} from './simulator';
+  createEphemeralWallet,
+  type PayrailWallet,
+} from '@platform/wallet-core';
+import { attr, html, on, signal, textareaValue } from 'workstar';
+import {
+  fundAccount,
+  loadAccount,
+  loadContract,
+  loadNetwork,
+  submitEnvelope,
+  type PublicContractState,
+  type PublicNetworkStatus,
+} from './api';
 
-type OutputTab = 'result' | 'sdk' | 'intent';
-const HISTORY_KEY = 'payrail-sandbox-history-v1';
+const DEFAULT_SOURCE = `payrail 1
+# Attached TEST is deposited into the contract account.
+entry deposit
+  attached_amount
+  store deposited
+  emit Deposited
+end
+
+# Refund the recorded amount to the caller, then clear state.
+entry refund
+  state deposited
+  transfer_caller
+  const 0
+  store deposited
+  emit Refunded
+end`;
+
+type Phase = 'starting' | 'ready' | 'working' | 'error';
 
 export function sandbox() {
   const network = signal<PublicNetworkStatus | null>(null);
-  const reachable = signal(false);
-  const selected = signal<ScenarioId>('escrow');
-  const busy = signal(false);
-  const outputTab = signal<OutputTab>('result');
-  const run = signal<SandboxRun | null>(null);
-  const output = signal(
-    'Choose a scenario, inspect the intent and run a local simulation.',
-  );
-  const outputKind = signal<'idle' | 'accepted' | 'rejected'>('idle');
-  const history = signal<readonly SandboxRun[]>(readHistory());
-  const copied = signal(false);
+  const wallet = signal<PayrailWallet | null>(null);
+  const phase = signal<Phase>('starting');
+  const message = signal('Creating an in-memory devnet wallet…');
+  const output = signal('No finalized contract operation yet.');
+  const contractId = signal('');
+  const contract = signal<PublicContractState | null>(null);
 
-  const refreshNetwork = async () => {
+  const refreshContract = async () => {
+    if (!contractId.value) return;
+    contract.value = await loadContract(contractId.value);
+  };
+
+  const initialize = async () => {
     try {
-      network.value = await loadNetwork();
-      reachable.value = true;
-    } catch {
-      reachable.value = false;
+      const status = await loadNetwork();
+      const created = await createEphemeralWallet(status.addressPrefix);
+      await fundAccount(created.address);
+      network.value = status;
+      wallet.value = created;
+      phase.value = 'ready';
+      message.value =
+        'Funded ephemeral wallet ready. Keys stay in this browser tab.';
+    } catch (error) {
+      phase.value = 'error';
+      message.value = errorMessage(error);
     }
   };
 
-  const chooseScenario = (id: ScenarioId) => {
-    selected.value = id;
-    const form = document.querySelector<HTMLFormElement>('#intent-form');
-    if (!form) return;
-    writeDraft(form, draftForScenario(id, network.value?.finalizedHeight));
-    run.value = null;
-    output.value = 'Scenario loaded. Run the simulation to inspect its result.';
-    outputKind.value = 'idle';
-    outputTab.value = 'result';
-  };
-
-  const runSimulation = async (event: Event) => {
+  const deploy = async (event: Event) => {
     event.preventDefault();
-    const form = event.currentTarget as HTMLFormElement;
-    busy.value = true;
-    output.value = 'Validating canonical values and evaluating policy…';
-    outputKind.value = 'idle';
+    const signer = wallet.value;
+    const status = network.value;
+    if (!signer || !status) return;
+    phase.value = 'working';
+    message.value = 'Compiling, signing and waiting for finalized deployment…';
     try {
-      const next = await simulateDraft(readDraft(form, selected.value));
-      run.value = next;
-      output.value = next.output;
-      outputKind.value = next.accepted ? 'accepted' : 'rejected';
-      outputTab.value = 'result';
-      const nextHistory = [next, ...history.value].slice(0, 10);
-      history.value = nextHistory;
-      sessionStorage.setItem(HISTORY_KEY, JSON.stringify(nextHistory));
+      const form = event.currentTarget as HTMLFormElement;
+      const code = compileContractSource(field(form, 'source'));
+      const account = await loadAccount(signer.address);
+      const envelope = await signer.signContractDeploy({
+        networkId: status.networkId,
+        assetId: status.asset.id,
+        idempotencyKey: random32(),
+        salt: random32(),
+        code,
+        fee: 1n,
+        nonce: BigInt(account.nonce),
+        validUntilHeight: BigInt(account.finalizedHeight) + 20n,
+      });
+      const result = await submitEnvelope(envelope);
+      if (!result.contract) {
+        throw new Error('Finalized block omitted contract deployment data.');
+      }
+      contractId.value = result.contract.contractId;
+      await refreshContract();
+      output.value = JSON.stringify(result, null, 2);
+      phase.value = 'ready';
+      message.value = `Contract finalized in block #${result.checkpoint.height}.`;
     } catch (error) {
-      run.value = null;
+      phase.value = 'error';
+      message.value = errorMessage(error);
       output.value = JSON.stringify(
-        {
-          mode: 'local-preview',
-          accepted: false,
-          networkWrite: false,
-          error: error instanceof Error ? error.message : 'Simulation failed.',
-        },
+        { accepted: false, error: errorMessage(error) },
         null,
         2,
       );
-      outputKind.value = 'rejected';
-      outputTab.value = 'result';
-    } finally {
-      busy.value = false;
     }
   };
 
-  const selectTab = (tab: OutputTab) => {
-    outputTab.value = tab;
-    const current = run.value;
-    const form = document.querySelector<HTMLFormElement>('#intent-form');
-    if (tab === 'result') {
-      output.value = current?.output ?? 'Run a simulation to see its result.';
-    } else if (form) {
-      const draft = readDraft(form, selected.value);
-      try {
-        output.value =
-          tab === 'sdk' ? sdkSnippet(draft) : serializeDraft(draft);
-      } catch (error) {
-        output.value =
-          error instanceof Error ? error.message : 'Invalid intent.';
-      }
-    }
-  };
-
-  const copyOutput = async () => {
-    await navigator.clipboard.writeText(output.value);
-    copied.value = true;
-    window.setTimeout(() => (copied.value = false), 1_400);
-  };
-
-  const exportIntent = () => {
-    const form = document.querySelector<HTMLFormElement>('#intent-form');
-    if (!form) return;
+  const call = async (event: Event) => {
+    event.preventDefault();
+    const signer = wallet.value;
+    const status = network.value;
+    if (!signer || !status || !contractId.value) return;
+    phase.value = 'working';
+    message.value = 'Signing call and waiting for deterministic execution…';
     try {
-      const body = serializeDraft(readDraft(form, selected.value));
-      const url = URL.createObjectURL(
-        new Blob([body], { type: 'application/json' }),
-      );
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `payrail-${selected.value}-intent.json`;
-      link.click();
-      URL.revokeObjectURL(url);
+      const form = event.currentTarget as HTMLFormElement;
+      const account = await loadAccount(signer.address);
+      const envelope = await signer.signContractCall({
+        networkId: status.networkId,
+        assetId: status.asset.id,
+        idempotencyKey: random32(),
+        contractId: contractId.value,
+        entrypoint: field(form, 'entrypoint'),
+        args: parseHex(field(form, 'args')),
+        attachedAmount: canonicalAmount(field(form, 'amount')),
+        fee: 1n,
+        executionLimit: canonicalAmount(field(form, 'executionLimit')),
+        nonce: BigInt(account.nonce),
+        validUntilHeight: BigInt(account.finalizedHeight) + 20n,
+      });
+      const result = await submitEnvelope(envelope);
+      await refreshContract();
+      output.value = JSON.stringify(result, null, 2);
+      phase.value = 'ready';
+      message.value = `Call finalized in block #${result.checkpoint.height}; state root updated.`;
     } catch (error) {
-      output.value = error instanceof Error ? error.message : 'Export failed.';
-      outputKind.value = 'rejected';
+      phase.value = 'error';
+      message.value = errorMessage(error);
+      output.value = JSON.stringify(
+        { accepted: false, error: errorMessage(error) },
+        null,
+        2,
+      );
     }
   };
 
-  const restoreRun = (item: SandboxRun) => {
-    selected.value = item.scenarioId;
-    run.value = item;
-    output.value = item.output;
-    outputKind.value = item.accepted ? 'accepted' : 'rejected';
-    outputTab.value = 'result';
-  };
-
-  void refreshNetwork();
-  window.setInterval(() => void refreshNetwork(), 10_000);
-  const initial = draftForScenario('escrow');
+  void initialize();
 
   return html`<main>
     <section class="intro">
       <div>
-        <p class="eyebrow">PAYRAIL / CONTRACT TOOLING</p>
-        <h1>Build the intent.<br /><em>Test the outcome.</em></h1>
+        <p class="eyebrow">PAYRAIL / LIVE CONTRACT DEVNET</p>
+        <h1>Write. Deploy.<br /><em>Execute.</em></h1>
       </div>
       <p class="intro-copy">
-        A local-first workspace for programmable payment flows. Validate typed
-        inputs, simulate policy outcomes, inspect encoded arguments and export
-        reproducible intents without exposing a key.
+        Compile deterministic Payrail Contract Language v1 in your browser, sign
+        with an ephemeral wallet and inspect the finalized block, events and
+        canonical on-chain state.
       </p>
     </section>
 
     <section class="status-grid" aria-label="Sandbox and network status">
-      <article class="safety-card">
+      <article
+        class="safety-card"
+        ${attr('data-live', () => String(phase.value === 'ready'))}
+      >
         <span class="status-dot"></span>
         <div>
-          <strong>Local simulation</strong
-          ><small>No signing · no network write</small>
+          <strong>${() => phaseLabel(phase.value)}</strong
+          ><small>${() => message.value}</small>
         </div>
-        <b>SAFE MODE</b>
+        <b>REAL DEVNET</b>
       </article>
       <article
         class="network-card"
-        ${attr('data-live', () => String(reachable.value))}
+        ${attr('data-live', () => String(Boolean(network.value)))}
       >
         <span class="network-pulse"></span>
         <div>
-          <small>PAYMENTS DEVNET</small>
-          <strong
-            >${() =>
-              reachable.value ? 'Connected' : 'Checking network'}</strong
-          >
+          <small>EPHEMERAL SIGNER</small
+          ><strong>${() => compact(wallet.value?.address)}</strong>
         </div>
         <dl>
           <div>
@@ -177,269 +186,219 @@ export function sandbox() {
           </div>
           <div>
             <dt>Validators</dt>
-            <dd>
-              ${() =>
-                network.value
-                  ? `${network.value.onlineValidators}/${network.value.validatorCount}`
-                  : '—'}
-            </dd>
+            <dd>${() => validatorLabel(network.value)}</dd>
           </div>
           <div>
             <dt>Asset</dt>
-            <dd>${() => network.value?.asset.symbol ?? 'TEST'}</dd>
+            <dd>${() => network.value?.asset.symbol ?? '—'}</dd>
           </div>
         </dl>
       </article>
     </section>
 
-    <section class="workspace" aria-label="Contract simulation workspace">
-      <aside class="scenario-panel">
-        ${panelHeading('01', 'Scenario', 'Choose a policy pattern')}
-        <div class="scenario-list" role="list">
-          ${sandboxScenarios.map(
-            (scenario) =>
-              html`<button
-                type="button"
-                ${attr('data-active', () =>
-                  String(selected.value === scenario.id),
-                )}
-                ${attr('aria-pressed', () =>
-                  String(selected.value === scenario.id),
-                )}
-                ${on('click', () => chooseScenario(scenario.id))}
-              >
-                <span>${scenario.number}</span>
-                <div>
-                  <strong>${scenario.label}</strong
-                  ><small>${scenario.summary}</small>
-                </div>
-                <i aria-hidden="true">→</i>
-              </button>`,
-          )}
-        </div>
-        <div class="boundary-note">
-          <strong>Execution boundary</strong>
-          <p>
-            This provider evaluates locally. A signed operation is never created
-            or broadcast.
-          </p>
-        </div>
-      </aside>
-
-      <section class="intent-panel">
-        ${panelHeading('02', 'Intent', 'Edit canonical SDK input')}
-        <form
-          id="intent-form"
-          ${on('submit', (event) => void runSimulation(event))}
-        >
-          <div class="field-wide">
-            ${field('Contract ID', 'contractId', initial.contractId)}
-          </div>
-          <div class="field-wide">
-            ${field('Caller', 'caller', initial.caller)}
-          </div>
-          <div class="field-wide">
-            ${field('Entrypoint', 'entrypoint', initial.entrypoint)}
-          </div>
-          ${field(
-            'Amount · atomic units',
-            'amountAtomic',
-            initial.amountAtomic,
-            'numeric',
-          )}
-          ${field(
-            'Execution budget',
-            'executionBudget',
-            initial.executionBudget,
-            'numeric',
-          )}
-          ${field('Nonce', 'nonce', initial.nonce, 'numeric')}
-          ${field(
-            'Valid until height',
-            'validUntilHeight',
-            initial.validUntilHeight,
-            'numeric',
-          )}
+    <section
+      class="workspace contract-workspace"
+      aria-label="Live contract workspace"
+    >
+      <section class="intent-panel source-panel">
+        ${panelHeading('01', 'Contract source', 'Payrail Contract Language v1')}
+        <form ${on('submit', (event) => void deploy(event))}>
           <label class="json-field field-wide"
-            ><span>Arguments · JSON</span
+            ><span>Source code</span
             ><textarea
-              name="argsJson"
+              name="source"
               spellcheck="false"
-              data-testid="args-json"
-              ${textareaValue(initial.argsJson)}
+              data-testid="contract-source"
+              ${textareaValue(DEFAULT_SOURCE)}
             ></textarea>
           </label>
           <div class="form-actions field-wide">
             <button
               class="run-button"
               type="submit"
-              data-testid="run-simulation"
-              ${attr('disabled', () => busy.value)}
+              data-testid="deploy-contract"
+              ${attr(
+                'disabled',
+                () => phase.value === 'starting' || phase.value === 'working',
+              )}
             >
-              ${() => (busy.value ? 'Simulating…' : 'Run simulation')}
-              <span>→</span>
+              ${() =>
+                phase.value === 'working'
+                  ? 'Finalizing…'
+                  : 'Compile & deploy'}<span>→</span>
             </button>
-            <button
-              class="secondary-button"
-              type="button"
-              ${on('click', exportIntent)}
+            <a
+              class="secondary-button docs-link"
+              href="https://github.com/payrail-one/sdk#smart-contracts"
+              >Language reference</a
             >
-              Export intent
-            </button>
           </div>
         </form>
       </section>
 
-      <section
-        class="output-panel"
-        ${attr('data-kind', () => outputKind.value)}
-      >
-        ${panelHeading('03', 'Inspect', 'Result, code and payload')}
-        <div class="output-tabs" role="tablist">
-          ${tab('result', 'Result', outputTab, selectTab)}
-          ${tab('sdk', 'SDK code', outputTab, selectTab)}
-          ${tab('intent', 'Intent JSON', outputTab, selectTab)}
-          <button
-            class="copy-button"
-            type="button"
-            ${on('click', () => void copyOutput())}
+      <section class="intent-panel call-panel">
+        ${panelHeading(
+          '02',
+          'Call contract',
+          'Signed execution against finalized state',
+        )}
+        <form ${on('submit', (event) => void call(event))}>
+          <div class="field-wide">
+            ${fieldTemplate(
+              'Contract ID',
+              'contractId',
+              () => contractId.value,
+              true,
+            )}
+          </div>
+          <div>
+            ${fieldTemplate('Entrypoint', 'entrypoint', () => 'deposit')}
+          </div>
+          <div>
+            ${fieldTemplate(
+              'Attached atomic',
+              'amount',
+              () => '1000000',
+              false,
+              'numeric',
+            )}
+          </div>
+          <div>
+            ${fieldTemplate(
+              'Execution limit',
+              'executionLimit',
+              () => '100000',
+              false,
+              'numeric',
+            )}
+          </div>
+          <div class="field-wide">
+            ${fieldTemplate('Arguments · lowercase hex', 'args', () => '')}
+          </div>
+          <div class="form-actions field-wide">
+            <button
+              class="run-button"
+              type="submit"
+              data-testid="call-contract"
+              ${attr(
+                'disabled',
+                () => !contractId.value || phase.value === 'working',
+              )}
+            >
+              Execute on devnet <span>→</span>
+            </button>
+            <button
+              class="secondary-button"
+              type="button"
+              ${on('click', () => void refreshContract())}
+            >
+              Refresh state
+            </button>
+          </div>
+        </form>
+        <div class="state-card">
+          <span>Canonical contract state</span>
+          <dl>
+            <div>
+              <dt>Balance</dt>
+              <dd>${() => contract.value?.balance ?? '—'}</dd>
+            </div>
+            <div>
+              <dt>Height</dt>
+              <dd>${() => contract.value?.finalizedHeight ?? '—'}</dd>
+            </div>
+            <div>
+              <dt>Code hash</dt>
+              <dd>${() => compact(contract.value?.codeHash)}</dd>
+            </div>
+          </dl>
+          <pre>
+${() => JSON.stringify(contract.value?.state ?? [], null, 2)}</pre
           >
-            ${() => (copied.value ? 'Copied' : 'Copy')}
-          </button>
-        </div>
-        <div class="result-state">
-          <span></span
-          ><b data-testid="result-state"
-            >${() =>
-              outputKind.value === 'idle'
-                ? 'READY'
-                : outputKind.value.toUpperCase()}</b
-          >
-          <small>LOCAL PREVIEW</small>
-        </div>
-        <pre data-testid="sandbox-output"><code>${output}</code></pre>
-        <div class="output-footer">
-          <span>networkWrite: false</span><span>integer-safe values</span
-          ><span>preview provider</span>
         </div>
       </section>
-    </section>
 
-    <section class="history-section">
-      <div class="history-heading">
-        <div>
-          <p class="eyebrow">SESSION LOG</p>
-          <h2>Simulation history</h2>
-        </div>
-        <p>
-          Stored in this browser tab only. Reloading starts a clean developer
-          session.
-        </p>
-      </div>
-      <div class="history-list">
-        ${() =>
-          history.value.length === 0
-            ? html`<div class="history-empty">
-                No runs yet. Your latest simulations will appear here.
-              </div>`
-            : history.value.map(
-                (item) =>
-                  html`<button
-                    type="button"
-                    ${on('click', () => restoreRun(item))}
-                  >
-                    <span
-                      class="history-state"
-                      ${attr('data-ok', String(item.accepted))}
-                    ></span
-                    ><strong>${item.summary}</strong
-                    ><small
-                      >${new Date(item.createdAt).toLocaleTimeString()}</small
-                    ><i>Open →</i>
-                  </button>`,
-              )}
-      </div>
+      <section class="output-panel live-output">
+        ${panelHeading(
+          '03',
+          'Finalized receipt',
+          'Block, state root and emitted topics',
+        )}
+        <div class="output-tabs"><span>NETWORK RESPONSE</span></div>
+        <pre data-testid="contract-output">${() => output.value}</pre>
+      </section>
     </section>
   </main>`;
 }
 
-function panelHeading(number: string, title: string, copy: string) {
+function panelHeading(number: string, title: string, subtitle: string) {
   return html`<div class="panel-heading">
     <span>${number}</span>
-    <div><strong>${title}</strong><small>${copy}</small></div>
+    <div><strong>${title}</strong><small>${subtitle}</small></div>
   </div>`;
 }
 
-function field(
+function fieldTemplate(
   label: string,
-  name: keyof SandboxDraft,
-  value: string,
-  inputmode?: string,
+  name: string,
+  value: () => string,
+  readonly = false,
+  inputMode?: string,
 ) {
   return html`<label
     ><span>${label}</span
     ><input
       ${attr('name', name)}
       ${attr('value', value)}
-      ${attr('inputmode', inputmode ?? 'text')}
-      required
+      ${attr('readonly', readonly ? 'true' : null)}
+      ${attr('inputmode', inputMode ?? null)}
   /></label>`;
 }
 
-function tab(
-  id: OutputTab,
-  label: string,
-  state: { value: OutputTab },
-  select: (id: OutputTab) => void,
-) {
-  return html`<button
-    type="button"
-    role="tab"
-    ${attr('aria-selected', () => String(state.value === id))}
-    ${on('click', () => select(id))}
-  >
-    ${label}
-  </button>`;
-}
-
-function readDraft(
-  form: HTMLFormElement,
-  scenarioId: ScenarioId,
-): SandboxDraft {
-  const data = new FormData(form);
-  const value = (name: string) => String(data.get(name) ?? '').trim();
-  return {
-    scenarioId,
-    contractId: value('contractId'),
-    caller: value('caller'),
-    entrypoint: value('entrypoint'),
-    amountAtomic: value('amountAtomic'),
-    executionBudget: value('executionBudget'),
-    nonce: value('nonce'),
-    validUntilHeight: value('validUntilHeight'),
-    argsJson: String(data.get('argsJson') ?? ''),
-  };
-}
-
-function writeDraft(form: HTMLFormElement, draft: SandboxDraft) {
-  for (const [name, value] of Object.entries(draft)) {
-    if (name === 'scenarioId') continue;
-    const control = form.elements.namedItem(name);
-    if (
-      control instanceof HTMLInputElement ||
-      control instanceof HTMLTextAreaElement
-    )
-      control.value = value;
+function field(form: HTMLFormElement, name: string): string {
+  const control = form.elements.namedItem(name);
+  if (
+    !(control instanceof HTMLInputElement) &&
+    !(control instanceof HTMLTextAreaElement)
+  ) {
+    throw new Error(`Missing ${name} field.`);
   }
+  return control.value.trim();
 }
 
-function readHistory(): readonly SandboxRun[] {
-  try {
-    const value = JSON.parse(
-      sessionStorage.getItem(HISTORY_KEY) ?? '[]',
-    ) as unknown;
-    return Array.isArray(value) ? (value as SandboxRun[]).slice(0, 10) : [];
-  } catch {
-    return [];
+function parseHex(value: string): Uint8Array<ArrayBuffer> {
+  return value.length === 0 ? new Uint8Array() : hexToBytes(value);
+}
+
+function canonicalAmount(value: string): bigint {
+  if (!/^(?:0|[1-9][0-9]{0,38})$/.test(value)) {
+    throw new Error('Amounts must be canonical unsigned integers.');
   }
+  return BigInt(value);
+}
+
+function random32(): Uint8Array<ArrayBuffer> {
+  return crypto.getRandomValues(new Uint8Array(32));
+}
+
+function compact(value: string | undefined): string {
+  if (!value) return '—';
+  return value.length > 22 ? `${value.slice(0, 12)}…${value.slice(-8)}` : value;
+}
+
+function validatorLabel(network: PublicNetworkStatus | null): string {
+  return network
+    ? `${network.onlineValidators}/${network.validatorCount}`
+    : '—';
+}
+
+function phaseLabel(phase: Phase): string {
+  if (phase === 'starting') return 'Preparing sandbox';
+  if (phase === 'working') return 'Consensus pending';
+  if (phase === 'error') return 'Action failed';
+  return 'Ready to sign';
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : 'Unexpected devnet failure.';
 }

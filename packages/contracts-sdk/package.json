@@ -1,7 +1,7 @@
 {
   "name": "@payrail/contracts-sdk",
-  "version": "0.0.1-preview.0",
-  "description": "Transport-neutral Payrail contract SDK preview",
+  "version": "0.1.0",
+  "description": "Payrail PRC1 smart-contract compiler, bytecode builder and client boundary",
   "type": "module",
   "exports": "./src/index.ts",
   "scripts": {

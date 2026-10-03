@@ -6,13 +6,13 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "check": "tsc --noEmit",
-    "test": "tsx --test tests/*.test.ts",
     "build": "vite build",
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
-    "@payrail/contracts-sdk": "0.0.1-preview.0",
+    "@payrail/contracts-sdk": "0.1.0",
     "@payrail/dapp-ui": "0.1.0",
+    "@platform/wallet-core": "0.0.0",
     "workstar": "0.2.2"
   },
   "devDependencies": {}
