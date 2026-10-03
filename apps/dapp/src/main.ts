@@ -25,7 +25,7 @@ function app() {
     ${sandbox()}
     <footer>
       <span>Payrail developer tooling · test assets only</span>
-      <span>Open source · local-first · no wallet secrets</span>
+      <span>Open source · live devnet · no wallet secrets</span>
     </footer>
   </div>`;
 }
