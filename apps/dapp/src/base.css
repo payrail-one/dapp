@@ -1,0 +1,149 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap');
+
+:root {
+  color: #eaf5ef;
+  background: #06100e;
+  font-family: 'Manrope', sans-serif;
+  font-synthesis: none;
+  --ink: #eaf5ef;
+  --muted: #819890;
+  --faint: #536a62;
+  --line: #1c332b;
+  --line-bright: #2e5547;
+  --surface: #091713;
+  --surface-raised: #0d1d18;
+  --accent: #83f2bd;
+  --accent-ink: #07130f;
+  --danger: #ff8c78;
+}
+
+* {
+  box-sizing: border-box;
+}
+html {
+  scroll-behavior: smooth;
+}
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 70% -10%, #163128 0, transparent 32rem), #06100e;
+}
+button,
+input,
+textarea {
+  font: inherit;
+}
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+a {
+  color: inherit;
+}
+.app-shell {
+  width: min(1800px, calc(100% - 48px));
+  margin: 0 auto;
+}
+.topbar {
+  min-height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+}
+.brand-wrap {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.product-name {
+  padding-left: 20px;
+  border-left: 1px solid var(--line-bright);
+  color: #a4bbb2;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+.topbar nav {
+  display: flex;
+  gap: 34px;
+}
+.topbar nav a {
+  color: #93a89f;
+  font-size: 13px;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.topbar nav a:hover {
+  color: var(--ink);
+}
+.github-link {
+  padding: 11px 16px;
+  border: 1px solid var(--line-bright);
+  color: var(--ink);
+  font:
+    500 12px 'DM Mono',
+    monospace;
+  text-decoration: none;
+}
+.github-link span {
+  color: var(--accent);
+}
+main {
+  padding: 0 0 60px;
+}
+.intro {
+  min-height: 330px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr);
+  align-items: end;
+  gap: 72px;
+  padding: 68px 2.5% 54px;
+  border-bottom: 1px solid var(--line);
+}
+.eyebrow {
+  margin: 0 0 18px;
+  color: var(--accent);
+  font:
+    500 11px 'DM Mono',
+    monospace;
+  letter-spacing: 0.16em;
+}
+h1 {
+  margin: 0;
+  font-size: clamp(54px, 6vw, 102px);
+  font-weight: 500;
+  letter-spacing: -0.07em;
+  line-height: 0.9;
+}
+h1 em {
+  color: var(--accent);
+  font-style: normal;
+}
+.intro-copy {
+  max-width: 590px;
+  margin: 0 0 5px;
+  color: #9aafa6;
+  font-size: 17px;
+  line-height: 1.75;
+}
+footer {
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--line);
+  color: var(--faint);
+  font:
+    400 10px 'DM Mono',
+    monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+::selection {
+  color: var(--accent-ink);
+  background: var(--accent);
+}

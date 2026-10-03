@@ -1,0 +1,28 @@
+{
+  "name": "payrail-dapp",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm --workspace @payrail/dapp run dev",
+    "check": "npm run check --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:e2e": "playwright test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "deploy": "npm --workspace @payrail/dapp run deploy"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "prettier": "3.8.3",
+    "typescript": "6.0.3",
+    "tsx": "4.23.15",
+    "vite": "8.0.16",
+    "wrangler": "4.147.0"
+  }
+}

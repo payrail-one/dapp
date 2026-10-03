@@ -1,0 +1,8 @@
+node_modules/
+**/dist/
+.wrangler/
+.workstar/
+playwright-report/
+test-results/
+*.tsbuildinfo
+*.tgz

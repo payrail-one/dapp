@@ -1,0 +1,15 @@
+{
+  "name": "@payrail/contracts-sdk",
+  "version": "0.0.1-preview.0",
+  "description": "Transport-neutral Payrail contract SDK preview",
+  "type": "module",
+  "exports": "./src/index.ts",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json",
+    "test": "tsx --test tests/*.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.2"
+  }
+}

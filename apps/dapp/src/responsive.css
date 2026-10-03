@@ -1,0 +1,156 @@
+@media (max-width: 1180px) {
+  .workspace {
+    grid-template-columns: 260px minmax(0, 1fr);
+  }
+  .output-panel {
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--line);
+  }
+  .intent-panel {
+    border-right: 0;
+  }
+  .output-panel pre {
+    min-height: 360px;
+  }
+}
+
+@media (max-width: 760px) {
+  .app-shell {
+    width: calc(100% - 24px);
+  }
+  .topbar {
+    min-height: 70px;
+  }
+  .topbar nav {
+    display: none;
+  }
+  .product-name {
+    display: none;
+  }
+  .intro {
+    min-height: auto;
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding: 50px 8px 40px;
+  }
+  h1 {
+    font-size: clamp(48px, 15vw, 72px);
+  }
+  .intro-copy {
+    font-size: 14px;
+  }
+  .status-grid {
+    grid-template-columns: 1fr;
+  }
+  .safety-card {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .network-card {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .network-card dl {
+    width: 100%;
+    margin: 10px 0 0;
+  }
+  .network-card dl div {
+    min-width: 0;
+    flex: 1;
+    padding-left: 12px;
+  }
+  .network-card dl div:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+  .workspace {
+    grid-template-columns: 1fr;
+    margin-top: 24px;
+  }
+  .scenario-panel,
+  .intent-panel {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .scenario-list {
+    grid-template-columns: 1fr 1fr;
+  }
+  .scenario-list button {
+    min-height: 130px;
+    grid-template-columns: 20px 1fr;
+    padding: 16px;
+  }
+  .scenario-list button i {
+    display: none;
+  }
+  .boundary-note {
+    display: none;
+  }
+  .intent-panel form {
+    padding: 16px;
+  }
+  .output-panel {
+    grid-column: auto;
+  }
+  .output-tabs button {
+    padding: 0 10px;
+  }
+  .output-panel pre {
+    min-height: 320px;
+  }
+  .output-footer {
+    gap: 9px;
+    overflow: hidden;
+  }
+  .history-section {
+    width: 100%;
+    margin-top: 48px;
+  }
+  .history-heading {
+    display: block;
+  }
+  .history-heading > p {
+    margin-top: 16px;
+  }
+  .history-list button {
+    grid-template-columns: 12px 1fr 60px;
+  }
+  .history-list button i {
+    display: none;
+  }
+  footer {
+    align-items: flex-start;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 470px) {
+  .safety-card,
+  .network-card {
+    padding: 18px 14px;
+  }
+  .network-card dl {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .scenario-list {
+    grid-template-columns: 1fr;
+  }
+  .scenario-list button {
+    min-height: 94px;
+  }
+  .intent-panel form {
+    grid-template-columns: 1fr;
+  }
+  .field-wide {
+    grid-column: auto;
+  }
+  .form-actions {
+    grid-template-columns: 1fr;
+  }
+  .output-tabs .copy-button {
+    display: none;
+  }
+}
